@@ -1,24 +1,27 @@
 ### Create product
-POST http://localhost:8080/api/products
-Content-Type: application/json
+POST https://productservice.drillbi.se/api/products
+Content-Type: application/json;
+
 
 {
-  "name": "iphone Pro 2000",
-  "description": "Apple laptop för utvecklare",
-  "price": 29999.99,
+  "name": "iPhone 16 Pro",
+  "description": "Apples flaggskepp med USB-C och A18",
+  "price": 12999,
   "currency": "SEK",
   "categoryId": null,
-  "categoryName": "Electronik",
+  "categoryName": "Mobiler",
   "stockQuantity": 10,
   "attributes": {
     "color": "space gray",
     "ram": "32GB",
-    "storage": "1TB SSD"
+    "storage": "256GB"
   },
   "imageUrls": [
-    "https://example.com/images/macbook.jpg"
+    "https://example.com/images/iphone16-front.jpg",
+    "https://example.com/images/iphone16-back.jpg"
   ]
 }
+
 
 
 ### hämta products

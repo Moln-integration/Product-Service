@@ -33,7 +33,7 @@ public class ProductImageAppService {
                 .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
 
         var stored = storage.store(file);
-        p.addImage(stored.url(), stored.originalName(), stored.contentType(), stored.size());
+        p.setImageUrl(stored.url());
 
         var saved = repo.save(p);
         return mapper.toResponse(saved);

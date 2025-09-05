@@ -5,10 +5,8 @@ import se.moln.productservice.dto.ProductRequest;
 import se.moln.productservice.dto.ProductResponse;
 import se.moln.productservice.model.Category;
 import se.moln.productservice.model.Product;
-import se.moln.productservice.model.ProductImage;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 @Component
@@ -26,8 +24,8 @@ public class ProductMapper {
         if (req.attributes() != null) {
             p.setAttributes(new LinkedHashMap<>(req.attributes()));
         }
-        if (req.imageUrls() != null) {
-            req.imageUrls().forEach(url -> p.addImage(url, null, null, null));
+        if (req.imageUrl() != null) {
+            p.setImageUrl(req.imageUrl());
         }
         return p;
     }
@@ -36,16 +34,13 @@ public class ProductMapper {
         Map<String, String> attrs =
                 p.getAttributes() == null ? Map.of() : new LinkedHashMap<>(p.getAttributes());
 
-        List<String> images =
-                p.getImages() == null ? List.of()
-                        : p.getImages().stream().map(ProductImage::getUrl).toList();
-
+        String imageUrl = p.getImageUrl();
         return new ProductResponse(
                 p.getId(), p.getName(), p.getSlug(), p.getDescription(),
                 p.getPrice(), p.getCurrency(),
                 p.getCategory() != null ? p.getCategory().getName() : null,
                 p.getStockQuantity(), p.isActive(),
-                attrs, images
+                attrs, imageUrl
         );
     }
 

@@ -5,9 +5,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import se.moln.productservice.dto.ProductRequest;
 import se.moln.productservice.dto.ProductResponse;
 import se.moln.productservice.exception.DuplicateProductException;
+import se.moln.productservice.exception.ResourceNotFoundException;
 import se.moln.productservice.mappning.ProductMapper;
 import se.moln.productservice.model.Category;
 import se.moln.productservice.model.Product;
@@ -16,6 +18,7 @@ import se.moln.productservice.repository.ProductRepository;
 import static se.moln.productservice.service.ProductSpecifications.*;
 
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -26,16 +29,18 @@ public class ProductService {
     private final ProductRepository repo;
     private final CategoryRepository catRepo;
     private final ProductMapper mapper;
+    private final FileStorageService fileStorageService;
 
-    public ProductService(ProductRepository repo, CategoryRepository catRepo, ProductMapper mapper){
+    public ProductService(ProductRepository repo, CategoryRepository catRepo, ProductMapper mapper, FileStorageService fileStorageService){
         this.repo = repo;
         this.catRepo = catRepo;
         this.mapper = mapper;
+        this.fileStorageService = fileStorageService;
     }
 
 
     @Transactional
-    public ProductResponse create(ProductRequest req){
+    public ProductResponse create(ProductRequest req, MultipartFile file) throws IOException {
         System.out.println("service");
 
         Category category = resolveCategory(req.categoryId(), req.categoryName());
@@ -50,7 +55,16 @@ public class ProductService {
         }
 
 
-        return mapper.toResponse(repo.save(entity));
+
+
+        if (file != null && !file.isEmpty()) {
+            FileStorageService.StoredFile storedFile = fileStorageService.store(file);
+            entity.setImageUrl(storedFile.url());
+        }
+
+        Product savedProduct = repo.save(entity);
+
+        return mapper.toResponse(savedProduct);
     }
 
 
@@ -114,6 +128,23 @@ public class ProductService {
                     c.setSlug("Uncategorized");
                     return catRepo.save(c);
                 });
+    }
+
+
+    @Transactional
+    public ProductResponse update(UUID id, ProductRequest req){
+        Product productToUpdate = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product with ID " + id + " not found."));
+
+        productToUpdate.setName(req.name());
+        productToUpdate.setSlug(slugify(req.name()));
+        productToUpdate.setDescription(req.description());
+        productToUpdate.setPrice(req.price());
+
+
+        Product updatedProduct = repo.save(productToUpdate);
+
+        return mapper.toResponse(updatedProduct);
     }
 
     private String slugify(String s){

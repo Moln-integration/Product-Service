@@ -3,7 +3,6 @@ package se.moln.productservice.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,9 +20,8 @@ public record ProductResponse(
         @Schema(example = """
             {"color":"space gray","ram":"32GB","storage":"256GB"}
         """) Map<String,String> attributes,
-        @Schema(example = """
-            ["https://example.com/images/iphone16-front.jpg","https://example.com/images/iphone16-back.jpg"]
-        """) List<String> images
+        @Schema(example = "https://example.com/images/iphone16-front.jpg")
+        String imageUrl
 ) {}
 
 

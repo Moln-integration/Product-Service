@@ -5,11 +5,10 @@ import jakarta.validation.constraints.*;
 
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@Schema(name = "ProductRequest", description = "Payload för att skapa/uppdatera en produkt")
+@Schema(name = "ProductRequest", description = "skapa en produkt")
 public record ProductRequest(
         @Schema(example = "iPhone 16 Pro", description = "Produktens namn")
         @NotBlank String name,
@@ -47,9 +46,7 @@ public record ProductRequest(
 
         @Schema(
                 description = "Lista med publika bild-URL:er (eller blob-URL:er)",
-                example = """
-            ["https://example.com/images/iphone16-front.jpg","https://example.com/images/iphone16-back.jpg"]
-            """
+                example = "https://example.com/images/iphone16-front.jpg"
         )
-        List<String> imageUrls
+        String imageUrl
 ) {}

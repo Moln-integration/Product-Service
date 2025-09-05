@@ -44,12 +44,17 @@ public class ProductController {
 
 
 
+    @PostMapping(
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<ProductResponse> create(
+            @RequestPart("product") ProductRequest product,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
 
-    @PostMapping
-    public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest req) {
-        System.out.println("kontroller");
-        System.out.println("hello");
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(req));
+
+        ProductResponse newProduct = service.create(product, file);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newProduct);
     }
 
     @GetMapping
@@ -128,5 +133,16 @@ public class ProductController {
     ) throws IOException {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(imageService.uploadImage(id, file));
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<ProductResponse> update(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProductRequest req){
+
+        System.out.println(req.categoryName());
+
+        ProductResponse updateProduct = service.update(id, req);
+        return ResponseEntity.ok(updateProduct);
     }
 }

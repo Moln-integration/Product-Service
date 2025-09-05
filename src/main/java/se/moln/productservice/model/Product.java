@@ -47,13 +47,10 @@ public class Product {
     @Column(nullable = false)
     private int stockQuantity = 0;
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(
-            name = "product_images",
-            joinColumns = @JoinColumn(name = "product_id")
-    )
-    @OrderColumn(name = "position")
-    private List<ProductImage> images = new ArrayList<>();
+
+    @Column
+    private String imageUrl;
+
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
@@ -69,6 +66,9 @@ public class Product {
 
     @Version
     private long version;
+
+
+
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -91,9 +91,6 @@ public class Product {
         this.stockQuantity += quantity;
     }
 
-    public void addImage(String url, String fileName, String contentType, Long sizeBytes) {
-        this.images.add(new ProductImage(url, fileName, contentType, sizeBytes));
-    }
 
     public void putAttribute(String key, String value) {
         this.attributes.put(Objects.requireNonNull(key), value);
@@ -124,9 +121,6 @@ public class Product {
     public int getStockQuantity() { return stockQuantity; }
     public void setStockQuantity(int stockQuantity) { this.stockQuantity = stockQuantity; }
 
-    public List<ProductImage> getImages() { return images; }
-    public void setImages(List<ProductImage> images) { this.images = images; }
-
     public Map<String, String> getAttributes() { return attributes; }
     public void setAttributes(Map<String, String> attributes) { this.attributes = attributes; }
 
@@ -136,6 +130,14 @@ public class Product {
     public long getVersion() { return version; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
 
     @Override
