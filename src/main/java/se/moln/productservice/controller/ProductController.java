@@ -123,8 +123,27 @@ public class ProductController {
     }
 
     // === Hämta produkt per ID (flyttat in) ===
+    @Operation(
+            summary = "Hämta produkt per ID",
+            description = "Returnerar en produkt baserat på dess UUID. Om produkten inte finns returneras 404."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Produkt hittad",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProductResponse.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "404", description = "Produkt ej hittad"),
+            @ApiResponse(responseCode = "400", description = "Ogiltigt UUID-format")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getById(@PathVariable UUID id) {
+    public ResponseEntity<ProductResponse> getById(
+            @Parameter(name = "id", description = "Produktens UUID", example = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3")
+            @PathVariable UUID id
+    ) {
         return ResponseEntity.ok(readService.getById(id));
     }
 
