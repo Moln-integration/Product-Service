@@ -35,5 +35,6 @@ public class FileStorageService {
         return new StoredFile(url, original, file.getContentType(), file.getSize());
     }
 
-    public record StoredFile(String url, String originalName, String contentType, long size) {}
+    public record StoredFile(String url, String originalName, String contentType, long size) {
+    }
 }

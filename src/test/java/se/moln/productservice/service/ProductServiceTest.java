@@ -300,4 +300,105 @@ class ProductServiceTest {
 
         verify(productRepository, never()).save(any());
     }
+
+    @Test
+    void create_WithExistingCategoryName_ShouldUseExistingCategory() {
+        ProductRequest req = new ProductRequest(
+                "Name",
+                "Desc",
+                BigDecimal.TEN,
+                "SEK",
+                null,
+                "Electronics",
+                0,
+                new HashMap<>(),
+                Collections.emptyList()
+        );
+
+        when(categoryRepository.findByNameIgnoreCase("Electronics")).thenReturn(Optional.of(category));
+        when(productMapper.toEntity(any(ProductRequest.class), any(Category.class))).thenReturn(product);
+        when(productRepository.existsBySlug(anyString())).thenReturn(false);
+        when(productRepository.existsByNameIgnoreCase(anyString())).thenReturn(false);
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(productMapper.toResponse(any(Product.class))).thenReturn(productResponse);
+
+        ProductResponse out = productService.create(req);
+
+        assertThat(out).isNotNull();
+        verify(categoryRepository, never()).save(any());
+        verify(productRepository).save(product);
+    }
+
+    @Test
+    void create_NoCategory_UncategorizedMissing_ShouldCreateUncategorized() {
+        ProductRequest req = new ProductRequest(
+                "Name",
+                "Desc",
+                BigDecimal.TEN,
+                "SEK",
+                null,
+                null,
+                0,
+                new HashMap<>(),
+                Collections.emptyList()
+        );
+
+        when(categoryRepository.findByNameIgnoreCase("Uncategorized")).thenReturn(Optional.empty());
+        when(categoryRepository.save(any(Category.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(productMapper.toEntity(any(ProductRequest.class), any(Category.class))).thenReturn(product);
+        when(productRepository.existsBySlug(anyString())).thenReturn(false);
+        when(productRepository.existsByNameIgnoreCase(anyString())).thenReturn(false);
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(productMapper.toResponse(any(Product.class))).thenReturn(productResponse);
+
+        ProductResponse out = productService.create(req);
+
+        assertThat(out).isNotNull();
+        verify(categoryRepository).save(any(Category.class));
+        verify(productRepository).save(product);
+    }
+
+    @Test
+    void searchProducts_WithOnlyName_ShouldFilter() {
+        when(productRepository.findAll(any(Specification.class))).thenReturn(List.of(product));
+        when(productMapper.toResponse(any(Product.class))).thenReturn(productResponse);
+
+        List<ProductResponse> result = productService.searchProducts("Test", null, null, null);
+
+        assertThat(result).hasSize(1);
+        verify(productRepository).findAll(any(Specification.class));
+    }
+
+    @Test
+    void searchProducts_WithOnlyCategoryName_ShouldFilter() {
+        when(productRepository.findAll(any(Specification.class))).thenReturn(List.of(product));
+        when(productMapper.toResponse(any(Product.class))).thenReturn(productResponse);
+
+        List<ProductResponse> result = productService.searchProducts(null, "Electronics", null, null);
+
+        assertThat(result).hasSize(1);
+        verify(productRepository).findAll(any(Specification.class));
+    }
+
+    @Test
+    void searchProducts_WithOnlyMinPrice_ShouldFilter() {
+        when(productRepository.findAll(any(Specification.class))).thenReturn(List.of(product));
+        when(productMapper.toResponse(any(Product.class))).thenReturn(productResponse);
+
+        List<ProductResponse> result = productService.searchProducts(null, null, BigDecimal.ONE, null);
+
+        assertThat(result).hasSize(1);
+        verify(productRepository).findAll(any(Specification.class));
+    }
+
+    @Test
+    void searchProducts_WithOnlyMaxPrice_ShouldFilter() {
+        when(productRepository.findAll(any(Specification.class))).thenReturn(List.of(product));
+        when(productMapper.toResponse(any(Product.class))).thenReturn(productResponse);
+
+        List<ProductResponse> result = productService.searchProducts(null, null, null, BigDecimal.TEN);
+
+        assertThat(result).hasSize(1);
+        verify(productRepository).findAll(any(Specification.class));
+    }
 }

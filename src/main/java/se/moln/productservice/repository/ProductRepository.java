@@ -10,10 +10,13 @@ import se.moln.productservice.model.Product;
 import java.util.List;
 import java.util.UUID;
 
-public interface ProductRepository extends JpaRepository<Product, UUID> , JpaSpecificationExecutor<Product> {
+public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
     Page<Product> findByActiveTrue(Pageable pageable);
+
     Page<Product> findByCategory_IdAndActiveTrue(UUID categoryId, Pageable pageable);
+
     boolean existsBySlug(String slug);
+
     boolean existsByNameIgnoreCase(String name);
 
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.attributes")

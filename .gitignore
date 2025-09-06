@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local H2 files
+/data/*.mv.db
+/data/*.trace.db
+
+# Local patches
+*.patch

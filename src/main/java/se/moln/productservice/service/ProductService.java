@@ -13,6 +13,7 @@ import se.moln.productservice.model.Category;
 import se.moln.productservice.model.Product;
 import se.moln.productservice.repository.CategoryRepository;
 import se.moln.productservice.repository.ProductRepository;
+
 import static se.moln.productservice.service.ProductSpecifications.*;
 
 
@@ -27,7 +28,7 @@ public class ProductService {
     private final CategoryRepository catRepo;
     private final ProductMapper mapper;
 
-    public ProductService(ProductRepository repo, CategoryRepository catRepo, ProductMapper mapper){
+    public ProductService(ProductRepository repo, CategoryRepository catRepo, ProductMapper mapper) {
         this.repo = repo;
         this.catRepo = catRepo;
         this.mapper = mapper;
@@ -35,7 +36,7 @@ public class ProductService {
 
 
     @Transactional
-    public ProductResponse create(ProductRequest req){
+    public ProductResponse create(ProductRequest req) {
         System.out.println("service");
 
         Category category = resolveCategory(req.categoryId(), req.categoryName());
@@ -55,13 +56,13 @@ public class ProductService {
 
 
     @Transactional
-    public Page<ProductResponse> getAllProducts(Pageable pageable){
+    public Page<ProductResponse> getAllProducts(Pageable pageable) {
         Page<Product> productPage = repo.findAllWithAttributes(pageable);
         return productPage.map(mapper::toResponse);
     }
 
     @Transactional
-    public List<ProductResponse> getAllProductsWithoutPagination(){
+    public List<ProductResponse> getAllProductsWithoutPagination() {
         List<Product> products = repo.findAllWithAttributes();
 
         return products.stream()
@@ -70,14 +71,15 @@ public class ProductService {
     }
 
     @Transactional
-    public List<ProductResponse> searchProducts(String name, String categoryName, BigDecimal minPrice, BigDecimal maxPrice){
-        Specification<Product> combinedSpec = fetchAttributes();;
+    public List<ProductResponse> searchProducts(String name, String categoryName, BigDecimal minPrice, BigDecimal maxPrice) {
+        Specification<Product> combinedSpec = fetchAttributes();
+        ;
 
-        if (name !=null){
+        if (name != null) {
             combinedSpec = combinedSpec.and(hasNameLike(name));
         }
 
-        if (categoryName != null){
+        if (categoryName != null) {
             combinedSpec = combinedSpec.and(hasCategoryName(categoryName));
         }
 
@@ -90,13 +92,13 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    private Category resolveCategory(UUID categoryId, String categoryName){
-        if (categoryId != null){
+    private Category resolveCategory(UUID categoryId, String categoryName) {
+        if (categoryId != null) {
             return catRepo.findById(categoryId)
                     .orElseThrow(() -> new IllegalArgumentException("Category not found: " + categoryId));
         }
 
-        if (categoryName !=null && !categoryName.isBlank()){
+        if (categoryName != null && !categoryName.isBlank()) {
             String normalized = categoryName.trim();
             return catRepo.findByNameIgnoreCase(normalized)
                     .orElseGet(() -> {
@@ -116,7 +118,7 @@ public class ProductService {
                 });
     }
 
-    private String slugify(String s){
-        return s.toLowerCase().trim().replaceAll("[^a-z0-9]+","-").replaceAll("(^-|-$)","");
+    private String slugify(String s) {
+        return s.toLowerCase().trim().replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "");
     }
 }

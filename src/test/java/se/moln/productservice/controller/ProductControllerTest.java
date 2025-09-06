@@ -18,6 +18,8 @@ import se.moln.productservice.dto.PageResponse;
 import se.moln.productservice.dto.ProductRequest;
 import se.moln.productservice.dto.ProductResponse;
 import se.moln.productservice.service.ProductImageAppService;
+import se.moln.productservice.service.ProductQueryService;
+import se.moln.productservice.service.ProductReadService;
 import se.moln.productservice.service.ProductService;
 
 import java.math.BigDecimal;
@@ -42,6 +44,12 @@ class ProductControllerTest {
 
     @MockitoBean
     private ProductImageAppService productImageAppService;
+
+    @MockitoBean
+    private ProductReadService productReadService;
+
+    @MockitoBean
+    private ProductQueryService productQueryService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -152,7 +160,7 @@ class ProductControllerTest {
                 MediaType.IMAGE_JPEG_VALUE,
                 "test image content".getBytes()
         );
-        
+
         when(productImageAppService.uploadImage(eq(productId), any())).thenReturn(productResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.multipart("/api/products/{id}/images", productId)
@@ -195,5 +203,40 @@ class ProductControllerTest {
                         .param("sortDir", "desc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].name").value("Test Product"));
+    }
+
+    @Test
+    void getById_ShouldReturnProduct() throws Exception {
+        when(productReadService.getById(eq(productId))).thenReturn(productResponse);
+
+        mockMvc.perform(get("/api/products/{id}", productId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(productId.toString()))
+                .andExpect(jsonPath("$.name").value("Test Product"));
+    }
+
+    @Test
+    void listActive_ShouldReturnPagedProducts() throws Exception {
+        Page<ProductResponse> page = new PageImpl<>(List.of(productResponse), PageRequest.of(0, 10), 1);
+        when(productQueryService.listActive(eq(0), eq(10))).thenReturn(page);
+
+        mockMvc.perform(get("/api/products/active")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(productId.toString()));
+    }
+
+    @Test
+    void listByCategory_ShouldReturnPagedProducts() throws Exception {
+        UUID categoryId = UUID.randomUUID();
+        Page<ProductResponse> page = new PageImpl<>(List.of(productResponse), PageRequest.of(0, 10), 1);
+        when(productQueryService.listByCategory(eq(categoryId), eq(0), eq(10))).thenReturn(page);
+
+        mockMvc.perform(get("/api/products/by-category/{categoryId}", categoryId)
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(productId.toString()));
     }
 }
