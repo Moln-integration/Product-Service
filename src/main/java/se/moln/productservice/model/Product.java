@@ -92,6 +92,7 @@ public class Product {
             throw new IllegalStateException("Otillräckligt lager");
         }
         this.stockQuantity -= quantity;
+        //TODO om stock blir 0 då isactiv blir false
     }
     public void releaseStock(int quantity) {
         if (quantity <= 0) throw new IllegalArgumentException("quantity måste vara > 0");
